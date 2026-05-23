@@ -1,0 +1,12 @@
+{
+  "name": "student-artwork-cleaner",
+  "version": "1.1.0",
+  "private": true,
+  "scripts": {
+    "lint": "node --check loader.js && node --check image-cleaner.js && node --check gallery-export.js && node --check ppt-export.js && node --check app.js && node --check tests/smoke.spec.js",
+    "test": "playwright test tests/smoke.spec.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}

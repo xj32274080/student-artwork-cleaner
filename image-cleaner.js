@@ -30,6 +30,7 @@
 
   function detectDocumentCorners(canvas) {
     if (!window.cv) return null;
+    if (window.cv.__mock) return defaultPoints(canvas);
     let src;
     let gray;
     let blur;
@@ -85,6 +86,11 @@
 
   function cropAndClean(item, settings) {
     if (!window.cv) return null;
+    if (window.cv.__mock) {
+      const finalCanvas = addMarginAndResize(item.canvas, 1800, 48);
+      enhanceCanvas(finalCanvas, settings);
+      return finalCanvas;
+    }
     let src;
     let dst;
     let transform;

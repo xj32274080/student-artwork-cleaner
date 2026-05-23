@@ -33,6 +33,30 @@ python -m http.server 8080
 http://localhost:8080
 ```
 
+## 如何测试
+
+首次运行测试前安装依赖：
+
+```powershell
+cd D:\codex-work\student-artwork-cleaner
+npm install
+npx playwright install chromium
+```
+
+运行语法检查：
+
+```powershell
+npm run lint
+```
+
+运行端到端 smoke test：
+
+```powershell
+npm test
+```
+
+测试会自动生成一张模拟作品照片，不依赖真实学生照片。为避免测试被外网 CDN 和 OpenCV 编译耗时影响，smoke test 会注入轻量 OpenCV 测试桩，用来验证导入、清洗流程、清洗图 ZIP 和网页作品墙 ZIP 导出；真实页面仍使用 OpenCV.js。
+
 ## 外部依赖与 libs 离线方案
 
 当前 `index.html` 默认从 CDN 加载：
@@ -41,7 +65,7 @@ http://localhost:8080
 - PptxGenJS：生成 PPTX
 - OpenCV.js：自动找边、透视裁切
 
-如果 CDN 不稳定，可以把这些文件下载到 `libs/`：
+OpenCV 会优先尝试 `libs/opencv.js`，本地文件不存在时再尝试 CDN。如果 CDN 不稳定，可以把这些文件下载到 `libs/`：
 
 ```text
 libs/jszip.min.js
@@ -49,12 +73,11 @@ libs/pptxgen.bundle.js
 libs/opencv.js
 ```
 
-然后把 `index.html` 里的三个 `<script src="https://...">` 改成：
+JSZip 和 PptxGenJS 当前仍在 `index.html` 中从 CDN 加载；如需完全离线，可以把 script 改成：
 
 ```html
 <script src="libs/jszip.min.js"></script>
 <script src="libs/pptxgen.bundle.js"></script>
-<script async src="libs/opencv.js" onload="onOpenCvLoaded()"></script>
 ```
 
 ## 功能说明
@@ -64,6 +87,7 @@ libs/opencv.js
 - 网页作品墙支持主题切换、展示滤镜和背景音乐上传。
 - PPT 至少包含封面页、作品墙页、单作品展示页。
 - 所有照片处理都在本地浏览器完成，不上传文件。
+- 大量手机照片会占用较多浏览器内存，建议分批处理，比如每批 30-50 张。
 
 ## 注意事项
 

@@ -373,6 +373,54 @@ select {
   white-space: pre-wrap;
 }
 
+.status.success {
+  border-color: #bbdfc7;
+  background: #f0fbf3;
+  color: #166534;
+}
+
+.status.warn {
+  border-color: #f3d79b;
+  background: #fff8e6;
+  color: #854d0e;
+}
+
+.status.error {
+  border-color: #f0b7b7;
+  background: #fff1f1;
+  color: #991b1b;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.field-grid label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.field-grid input {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #fffefa;
+  color: var(--ink);
+}
+
+.selected-meta {
+  border-top: 1px dashed var(--line);
+  border-bottom: 1px dashed var(--line);
+  padding: 10px 0;
+}
+
 @media (max-width: 1120px) {
   .app-shell { grid-template-columns: 1fr; }
   .image-list { max-height: 260px; }

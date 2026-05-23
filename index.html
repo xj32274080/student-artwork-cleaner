@@ -5,14 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>学生美术作品照片清洗器</title>
   <link rel="stylesheet" href="styles.css" />
-  <script>
-    window.onOpenCvLoaded = function onOpenCvLoaded() {
-      window.dispatchEvent(new CustomEvent('opencv-script-loaded'));
-    };
-  </script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
-  <script async src="https://docs.opencv.org/4.x/opencv.js" onload="onOpenCvLoaded()"></script>
 </head>
 <body>
   <header class="topbar">
@@ -88,6 +82,36 @@
         <label class="control-label" for="saturation">色彩保留 <span id="saturationVal">6</span></label>
         <input id="saturation" type="range" min="-30" max="35" value="6" />
 
+        <div class="field-grid">
+          <label>
+            <span>展览标题</span>
+            <input id="exhibitionTitle" type="text" value="学生美术作品展" />
+          </label>
+          <label>
+            <span>班级</span>
+            <input id="className" type="text" placeholder="例如：三年级 2 班" />
+          </label>
+          <label>
+            <span>学校</span>
+            <input id="schoolName" type="text" placeholder="学校名称" />
+          </label>
+        </div>
+
+        <div class="field-grid selected-meta">
+          <label>
+            <span>学生姓名</span>
+            <input id="studentName" type="text" placeholder="选中照片后填写" />
+          </label>
+          <label>
+            <span>作品名</span>
+            <input id="artworkTitle" type="text" placeholder="默认使用文件名" />
+          </label>
+          <label>
+            <span>备注</span>
+            <input id="artworkNote" type="text" placeholder="材料、主题或一句说明" />
+          </label>
+        </div>
+
         <label class="control-label" for="galleryTheme">作品墙主题</label>
         <select id="galleryTheme">
           <option value="flower">柔和花边</option>
@@ -122,11 +146,12 @@
           <button class="ghost" id="downloadPptBtn" type="button">下载展示 PPT</button>
         </div>
 
-        <div class="status" id="statusBox">正在加载 OpenCV.js。如果网络加载失败，请查看 README 的 libs 本地依赖方案。</div>
+        <div class="status" id="statusBox">正在加载 OpenCV。</div>
       </div>
     </section>
   </main>
 
+  <script src="loader.js"></script>
   <script src="image-cleaner.js"></script>
   <script src="gallery-export.js"></script>
   <script src="ppt-export.js"></script>
