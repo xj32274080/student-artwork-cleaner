@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>学生美术作品照片清洗器</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    window.onOpenCvLoaded = function onOpenCvLoaded() {
+      window.dispatchEvent(new CustomEvent('opencv-script-loaded'));
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <script async src="https://docs.opencv.org/4.x/opencv.js" onload="onOpenCvLoaded()"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Local Artwork Studio</p>
+      <h1>学生美术作品照片清洗器</h1>
+      <p class="subtitle">批量导入、找边拉正、提亮去灰，再生成清洗图、网页作品墙和展示 PPT。</p>
+    </div>
+    <div class="topbar-flower" aria-hidden="true"></div>
+  </header>
+
+  <main class="app-shell">
+    <section class="panel import-panel">
+      <h2>1. 导入照片</h2>
+      <div class="panel-body">
+        <label class="drop-zone" id="dropZone" for="fileInput">
+          <span class="drop-icon" aria-hidden="true">+</span>
+          <strong>点击选择，或把照片拖进来</strong>
+          <span>支持 JPG / PNG / WEBP，可一次选择多张。</span>
+        </label>
+        <input id="fileInput" type="file" accept="image/*" multiple />
+
+        <div class="button-row">
+          <button class="secondary" id="clearBtn" type="button">清空</button>
+          <button class="ghost" id="helpBtn" type="button">使用说明</button>
+        </div>
+
+        <p class="small">照片只在本机浏览器中处理，不会上传。自动找边失败时，拖动中间画布里的四个角点即可手动校准。</p>
+        <div class="image-list" id="imageList" aria-label="已导入照片列表"></div>
+      </div>
+    </section>
+
+    <section class="panel stage-panel">
+      <div class="stage-toolbar">
+        <div>
+          <strong id="currentName">还没有导入照片</strong>
+          <p id="currentMeta">请选择一批学生作品照片。</p>
+        </div>
+        <div class="button-row compact">
+          <button class="secondary" id="prevBtn" type="button">上一张</button>
+          <button class="secondary" id="nextBtn" type="button">下一张</button>
+        </div>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="viewCanvas" width="1000" height="680"></canvas>
+      </div>
+
+      <div class="hint">
+        操作：先点 <span>自动找边</span>。如果框不准，拖动四个橙色圆点到作品四角，再点 <span>裁切清洗</span>。
+      </div>
+    </section>
+
+    <section class="panel controls-panel">
+      <h2>2. 清洗与导出</h2>
+      <div class="panel-body">
+        <div class="button-row">
+          <button id="autoBtn" type="button">自动找边</button>
+          <button id="processBtn" type="button">裁切清洗</button>
+          <button class="secondary" id="rotateLeftBtn" type="button">左转</button>
+          <button class="secondary" id="rotateRightBtn" type="button">右转</button>
+        </div>
+
+        <label class="control-label" for="brightness">亮度 <span id="brightnessVal">8</span></label>
+        <input id="brightness" type="range" min="-40" max="60" value="8" />
+
+        <label class="control-label" for="contrast">对比 <span id="contrastVal">8</span></label>
+        <input id="contrast" type="range" min="-30" max="50" value="8" />
+
+        <label class="control-label" for="shadow">压阴影 / 去灰 <span id="shadowVal">24</span></label>
+        <input id="shadow" type="range" min="0" max="70" value="24" />
+
+        <label class="control-label" for="saturation">色彩保留 <span id="saturationVal">6</span></label>
+        <input id="saturation" type="range" min="-30" max="35" value="6" />
+
+        <label class="control-label" for="galleryTheme">作品墙主题</label>
+        <select id="galleryTheme">
+          <option value="flower">柔和花边</option>
+          <option value="watercolor">水彩蓝</option>
+          <option value="museum">小小美术馆</option>
+          <option value="star">星光展览</option>
+        </select>
+
+        <label class="control-label" for="displayFilter">展示滤镜</label>
+        <select id="displayFilter">
+          <option value="natural">自然原图</option>
+          <option value="soft">柔光提亮</option>
+          <option value="warm">暖色纸感</option>
+          <option value="fresh">清新明亮</option>
+          <option value="vivid">鲜艳展览</option>
+        </select>
+        <p class="small">展示滤镜只用于作品墙和 PPT，不会覆盖原始清洗图。</p>
+
+        <label class="control-label" for="musicInput">背景音乐（网页作品墙）</label>
+        <input id="musicInput" class="file-control" type="file" accept="audio/*" />
+        <p class="small">浏览器通常要求观众点击后才播放有声音乐。</p>
+
+        <div class="button-row">
+          <button class="ghost" id="processAllBtn" type="button">全部自动清洗</button>
+        </div>
+
+        <div class="preview" id="previewBox"><span>清洗后的预览会出现在这里</span></div>
+
+        <div class="button-row">
+          <button id="downloadZipBtn" type="button">下载清洗图 ZIP</button>
+          <button class="secondary" id="downloadGalleryBtn" type="button">下载网页作品墙 ZIP</button>
+          <button class="ghost" id="downloadPptBtn" type="button">下载展示 PPT</button>
+        </div>
+
+        <div class="status" id="statusBox">正在加载 OpenCV.js。如果网络加载失败，请查看 README 的 libs 本地依赖方案。</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="image-cleaner.js"></script>
+  <script src="gallery-export.js"></script>
+  <script src="ppt-export.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
