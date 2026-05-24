@@ -43,21 +43,34 @@
   }
 
   async function handleFiles(files) {
-    const imageFiles = files.filter((file) => file.type.startsWith('image/'));
-    if (!imageFiles.length) return;
+    const imageFiles = files.filter((file) => file.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|svg|heic|heif)$/i.test(file.name));
+    const skipped = files.length - imageFiles.length;
+    if (!imageFiles.length) {
+      if (files.length) setStatus('没有找到图片文件。请导入浏览器可读取的照片。', 'warn');
+      return;
+    }
 
     setStatus(`正在读取 ${imageFiles.length} 张图片……`);
+    let imported = 0;
+    const failed = [];
     for (const file of imageFiles) {
       try {
         items.push(await loadImageItem(file));
+        imported += 1;
       } catch (error) {
         console.error(error);
+        failed.push(file.name);
       }
     }
 
     renderList();
     if (currentIndex === -1 && items.length) selectIndex(0);
-    setStatus(`已导入 ${items.length} 张。建议先逐张自动找边，确认边框后再清洗。`, 'success');
+    const notes = [];
+    if (imported) notes.push(`本次已导入 ${imported} 张，当前共 ${items.length} 张。`);
+    if (skipped) notes.push(`已跳过 ${skipped} 个非图片文件。`);
+    if (failed.length) notes.push(`有 ${failed.length} 张图片读取失败：${failed.slice(0, 3).join('、')}${failed.length > 3 ? '……' : ''}。如果是 HEIC / HEIF，请先转成 JPG。`);
+    notes.push('建议先逐张自动找边，确认边框后再清洗。');
+    setStatus(notes.join('\n'), failed.length || skipped ? 'warn' : 'success');
     updateButtons();
   }
 
