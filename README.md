@@ -85,6 +85,8 @@ JSZip 和 PptxGenJS 当前仍在 `index.html` 中从 CDN 加载；如需完全�
 - 清洗图 ZIP 使用原始清洗结果，不叠加展示滤镜。
 - 网页作品墙和 PPT 会应用“展示滤镜”，但不会破坏或覆盖原始清洗图。
 - 网页作品墙支持主题切换、展示滤镜和背景音乐上传。
+- 网页作品墙导出为完整静态展览包：`gallery-export/index.html`、`assets/css/gallery.css`、`assets/js/gallery.js`、`assets/images/`、`assets/music/`、`data/works.json`。
+- 导出的作品展包含封面、作品墙、大图查看、键盘切换、自动播放和音乐播放按钮，不依赖外部 CDN。
 - PPT 至少包含封面页、作品墙页、单作品展示页。
 - 所有照片处理都在本地浏览器完成，不上传文件。
 - 大量手机照片会占用较多浏览器内存，建议分批处理，比如每批 30-50 张。

@@ -62,9 +62,10 @@
         failed.push(file.name);
       }
     }
-
+    syncDisplayOrder();
     renderList();
     if (currentIndex === -1 && items.length) selectIndex(0);
+
     const notes = [];
     if (imported) notes.push(`本次已导入 ${imported} 张，当前共 ${items.length} 张。`);
     if (skipped) notes.push(`已跳过 ${skipped} 个非图片文件。`);
@@ -89,17 +90,23 @@
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
 
+        const parsed = parseFileName(file.name);
         resolve({
+          id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          imageFileName: file.name,
           name: file.name.replace(/\.[^.]+$/, ''),
           fileName: file.name,
+          title: parsed.title,
+          studentName: parsed.studentName,
+          className: '',
+          note: '',
+          selected: true,
+          displayOrder: items.length,
           canvas,
           thumbnailUrl: await createThumbnailUrl(canvas),
           points: window.ImageCleaner.defaultPoints(canvas),
           outputCanvas: null,
           status: '待处理',
-          studentName: '',
-          artworkTitle: '',
-          note: '',
         });
       };
       image.onerror = (error) => {
@@ -108,6 +115,15 @@
       };
       image.src = url;
     });
+  }
+
+  function parseFileName(fileName) {
+    const base = fileName.replace(/\.[^.]+$/, '').trim();
+    const parts = base.split(/[-_—－\s]+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return { studentName: parts[0], title: parts.slice(1).join(' ') };
+    }
+    return { studentName: '', title: base };
   }
 
   async function createThumbnailUrl(canvas, maxSide = 220) {
@@ -134,6 +150,12 @@
     item.thumbnailUrl = await createThumbnailUrl(item.outputCanvas || item.canvas);
   }
 
+  function syncDisplayOrder() {
+    items.forEach((item, index) => {
+      item.displayOrder = index + 1;
+    });
+  }
+
   function renderList() {
     imageList.innerHTML = '';
     items.forEach((item, index) => {
@@ -148,8 +170,9 @@
 
       const meta = document.createElement('div');
       const tagClass = item.status === '已清洗' ? 'ok' : item.status.includes('复核') ? 'warn' : '';
-      const title = item.artworkTitle || item.fileName;
-      meta.innerHTML = `<div class="item-name">${window.GalleryExport.escapeHtml(title)}</div><span class="tag ${tagClass}">${item.status}</span>`;
+      const title = item.title || item.name || item.fileName;
+      const includeMark = item.selected ? '' : ' · 不展出';
+      meta.innerHTML = `<div class="item-name">${window.GalleryExport.escapeHtml(title)}</div><span class="tag ${tagClass}">${item.status}${includeMark}</span>`;
 
       node.append(thumb, meta);
       imageList.appendChild(node);
@@ -168,7 +191,7 @@
 
   function updateButtons() {
     const hasCurrent = currentIndex >= 0;
-    ['prevBtn', 'nextBtn', 'autoBtn', 'processBtn', 'rotateLeftBtn', 'rotateRightBtn', 'processAllBtn', 'downloadZipBtn', 'downloadGalleryBtn', 'downloadPptBtn'].forEach((id) => {
+    ['prevBtn', 'nextBtn', 'autoBtn', 'processBtn', 'rotateLeftBtn', 'rotateRightBtn', 'processAllBtn', 'downloadZipBtn', 'downloadGalleryBtn', 'downloadPptBtn', 'moveUpBtn', 'moveDownBtn', 'extractMetaBtn'].forEach((id) => {
       $(id).disabled = !hasCurrent;
     });
     $('autoBtn').disabled = !hasCurrent || !cvReady;
@@ -176,6 +199,8 @@
     $('processAllBtn').disabled = !hasCurrent || !cvReady;
     $('prevBtn').disabled = !hasCurrent || currentIndex <= 0;
     $('nextBtn').disabled = !hasCurrent || currentIndex >= items.length - 1;
+    $('moveUpBtn').disabled = !hasCurrent || currentIndex <= 0;
+    $('moveDownBtn').disabled = !hasCurrent || currentIndex >= items.length - 1;
   }
 
   function renderCurrent() {
@@ -302,19 +327,26 @@
 
   function getProjectMeta() {
     return {
-      exhibitionTitle: $('exhibitionTitle').value.trim() || '学生美术作品展',
+      exhibitionTitle: $('exhibitionTitle').value.trim() || '童心绘世界',
+      exhibitionSubtitle: $('exhibitionSubtitle').value.trim() || '学生美术作品线上展',
       className: $('className').value.trim(),
       schoolName: $('schoolName').value.trim(),
+      exhibitionDate: $('exhibitionDate').value,
+      introText: $('introText').value.trim() || '欢迎走进这场由孩子们共同完成的线上美术展。每一幅作品都保留了观察、想象和表达的痕迹，也记录着课堂里认真发生过的创造。',
+      themeName: $('galleryTheme').value,
+      filterName: $('displayFilter').value,
+      displayMode: $('displayMode').value,
     };
   }
 
   function updateSelectedMetaFields() {
     const item = currentIndex >= 0 ? items[currentIndex] : null;
-    ['studentName', 'artworkTitle', 'artworkNote'].forEach((id) => {
+    ['includeInGallery', 'studentName', 'artworkTitle', 'artworkNote'].forEach((id) => {
       $(id).disabled = !item;
     });
+    $('includeInGallery').checked = item?.selected ?? true;
     $('studentName').value = item?.studentName || '';
-    $('artworkTitle').value = item?.artworkTitle || '';
+    $('artworkTitle').value = item?.title || '';
     $('artworkNote').value = item?.note || '';
   }
 
@@ -324,6 +356,29 @@
     renderList();
   }
 
+  function moveCurrent(delta) {
+    if (currentIndex < 0) return;
+    const nextIndex = currentIndex + delta;
+    if (nextIndex < 0 || nextIndex >= items.length) return;
+    const [item] = items.splice(currentIndex, 1);
+    items.splice(nextIndex, 0, item);
+    currentIndex = nextIndex;
+    syncDisplayOrder();
+    renderList();
+    renderCurrent();
+    updateButtons();
+  }
+
+  function extractCurrentMetaFromFileName() {
+    if (currentIndex < 0) return;
+    const parsed = parseFileName(items[currentIndex].fileName);
+    items[currentIndex].studentName = parsed.studentName;
+    items[currentIndex].title = parsed.title;
+    updateSelectedMetaFields();
+    renderList();
+    setStatus('已从文件名提取当前作品信息。', 'success');
+  }
+
   function autoDetectCurrent() {
     if (currentIndex < 0 || !cvReady) return;
     const item = items[currentIndex];
@@ -331,16 +386,13 @@
     if (points) {
       item.points = points;
       item.status = '已找边';
-      item.note = item.note || '自动找边成功，请检查橙色框是否贴合作品边缘。';
       setStatus('自动找边成功，请检查橙色框是否贴合作品边缘。', 'success');
     } else {
       item.status = '需复核';
-      item.note = item.note || '自动找边失败。请手动拖动四个橙色点到作品四角。';
       setStatus('自动找边失败。请手动拖动四个橙色点到作品四角。', 'warn');
     }
     renderList();
     renderCurrent();
-    updateSelectedMetaFields();
   }
 
   async function rotateCurrent(degrees) {
@@ -377,7 +429,6 @@
     if (result) {
       item.outputCanvas = result;
       item.status = '已清洗';
-      if (!item.note || item.note.startsWith('自动找边')) item.note = '已生成清洗图。';
       await refreshThumbnail(item);
       setStatus(`${item.fileName}\n已裁切、拉正、清洗。`, 'success');
     } else {
@@ -387,7 +438,6 @@
     renderList();
     renderCurrent();
     updatePreview();
-    updateSelectedMetaFields();
   }
 
   async function processAll() {
@@ -446,6 +496,12 @@
     return items.filter((item) => item.outputCanvas);
   }
 
+  function galleryItems() {
+    return items
+      .filter((item) => item.outputCanvas && item.selected)
+      .sort((a, b) => a.displayOrder - b.displayOrder);
+  }
+
   async function downloadCleanZip() {
     const done = cleanedItems();
     if (!done.length) {
@@ -463,40 +519,43 @@
   }
 
   async function downloadGalleryZip() {
-    const done = cleanedItems();
+    const done = galleryItems();
     if (!done.length) {
-      setStatus('还没有清洗后的图片。', 'warn');
+      setStatus('还没有可进入展览的清洗图片。请先清洗作品，并勾选“进入展览”。', 'warn');
       return;
     }
     if (typeof JSZip === 'undefined') {
       setStatus('JSZip 还没有加载成功，请检查网络或改用 libs 本地依赖。', 'error');
       return;
     }
-    setStatus('正在打包网页作品墙 ZIP……');
+    setStatus('正在打包线上作品展 ZIP……');
+    const meta = getProjectMeta();
     const blob = await window.GalleryExport.buildGalleryZip(done, {
-      themeName: $('galleryTheme').value,
-      filterName: $('displayFilter').value,
+      themeName: meta.themeName,
+      filterName: meta.filterName,
+      displayMode: meta.displayMode,
       musicFile,
-      meta: getProjectMeta(),
+      meta,
     });
-    window.GalleryExport.downloadBlob(blob, '学生作品网页展廊.zip');
-    setStatus('网页作品墙 ZIP 已生成。解压后打开 index.html 即可。', 'success');
+    window.GalleryExport.downloadBlob(blob, '学生作品线上展.zip');
+    setStatus('线上作品展 ZIP 已生成。解压后打开 gallery-export/index.html 即可。', 'success');
   }
 
   async function downloadPptx() {
-    const done = cleanedItems();
+    const done = galleryItems();
     if (!done.length) {
-      setStatus('还没有清洗后的图片。', 'warn');
+      setStatus('还没有可进入展览的清洗图片。', 'warn');
       return;
     }
     try {
       setStatus('正在生成 PPT……');
+      const meta = getProjectMeta();
       await window.PptExport.downloadPptx(done, {
-        themeName: $('galleryTheme').value,
-        filterName: $('displayFilter').value,
-        meta: getProjectMeta(),
+        themeName: meta.themeName,
+        filterName: meta.filterName,
+        meta,
       });
-      setStatus('PPT 已生成。PPT 不自动嵌入音乐，音乐请优先用网页作品墙播放。', 'success');
+      setStatus('PPT 已生成。PPT 不自动嵌入音乐，音乐请优先用网页作品展播放。', 'success');
     } catch (error) {
       setStatus(error.message, 'error');
     }
@@ -546,9 +605,13 @@
       musicFile = event.target.files?.[0] || null;
       setStatus(musicFile ? `已选择背景音乐：${musicFile.name}` : '已取消背景音乐。');
     });
+    $('includeInGallery').addEventListener('change', (event) => updateCurrentMetaField('selected', event.target.checked));
     $('studentName').addEventListener('input', (event) => updateCurrentMetaField('studentName', event.target.value));
-    $('artworkTitle').addEventListener('input', (event) => updateCurrentMetaField('artworkTitle', event.target.value));
+    $('artworkTitle').addEventListener('input', (event) => updateCurrentMetaField('title', event.target.value));
     $('artworkNote').addEventListener('input', (event) => updateCurrentMetaField('note', event.target.value));
+    $('moveUpBtn').onclick = () => moveCurrent(-1);
+    $('moveDownBtn').onclick = () => moveCurrent(1);
+    $('extractMetaBtn').onclick = extractCurrentMetaFromFileName;
 
     viewCanvas.addEventListener('mousedown', startDrag);
     viewCanvas.addEventListener('mousemove', dragMove);

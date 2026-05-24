@@ -82,10 +82,16 @@
         <label class="control-label" for="saturation">色彩保留 <span id="saturationVal">6</span></label>
         <input id="saturation" type="range" min="-30" max="35" value="6" />
 
+        <div class="settings-block">
+          <h3>展览设置</h3>
         <div class="field-grid">
           <label>
             <span>展览标题</span>
-            <input id="exhibitionTitle" type="text" value="学生美术作品展" />
+            <input id="exhibitionTitle" type="text" value="童心绘世界" />
+          </label>
+          <label>
+            <span>副标题</span>
+            <input id="exhibitionSubtitle" type="text" value="学生美术作品线上展" />
           </label>
           <label>
             <span>班级</span>
@@ -95,9 +101,29 @@
             <span>学校</span>
             <input id="schoolName" type="text" placeholder="学校名称" />
           </label>
+          <label>
+            <span>展览日期</span>
+            <input id="exhibitionDate" type="date" />
+          </label>
+          <label class="wide-field">
+            <span>展览导语</span>
+            <textarea id="introText" rows="3" placeholder="写给学生、家长和观众的一段展览导语。"></textarea>
+          </label>
+        </div>
         </div>
 
-        <div class="field-grid selected-meta">
+        <div class="settings-block selected-meta">
+          <h3>作品信息</h3>
+          <div class="button-row compact">
+            <button class="secondary" id="extractMetaBtn" type="button">从文件名提取</button>
+            <button class="secondary" id="moveUpBtn" type="button">上移</button>
+            <button class="secondary" id="moveDownBtn" type="button">下移</button>
+          </div>
+        <div class="field-grid">
+          <label class="checkbox-field">
+            <input id="includeInGallery" type="checkbox" checked />
+            <span>进入展览</span>
+          </label>
           <label>
             <span>学生姓名</span>
             <input id="studentName" type="text" placeholder="选中照片后填写" />
@@ -111,22 +137,29 @@
             <input id="artworkNote" type="text" placeholder="材料、主题或一句说明" />
           </label>
         </div>
+        </div>
 
         <label class="control-label" for="galleryTheme">作品墙主题</label>
         <select id="galleryTheme">
-          <option value="flower">柔和花边</option>
-          <option value="watercolor">水彩蓝</option>
           <option value="museum">小小美术馆</option>
-          <option value="star">星光展览</option>
+          <option value="garden">童心花园</option>
+          <option value="watercolor">水彩时光</option>
+          <option value="star">星空画廊</option>
         </select>
 
         <label class="control-label" for="displayFilter">展示滤镜</label>
         <select id="displayFilter">
-          <option value="natural">自然原图</option>
+          <option value="original">原色展示</option>
           <option value="soft">柔光提亮</option>
-          <option value="warm">暖色纸感</option>
+          <option value="warm">暖色童年</option>
           <option value="fresh">清新明亮</option>
-          <option value="vivid">鲜艳展览</option>
+          <option value="film">轻胶片感</option>
+          <option value="contrast">高对比展览</option>
+        </select>
+        <label class="control-label" for="displayMode">默认展示方式</label>
+        <select id="displayMode">
+          <option value="wall">作品墙</option>
+          <option value="slideshow">幻灯片</option>
         </select>
         <p class="small">展示滤镜只用于作品墙和 PPT，不会覆盖原始清洗图。</p>
 

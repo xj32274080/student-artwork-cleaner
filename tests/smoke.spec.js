@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const http = require('http');
+const JSZip = require('jszip');
 const path = require('path');
 
 const rootDir = path.resolve(__dirname, '..');
@@ -81,6 +82,13 @@ test('imports, cleans, and exports generated artwork image', async ({ page }, te
 
   await page.locator('#studentName').fill('测试学生');
   await page.locator('#artworkTitle').fill('自动化测试作品');
+  await page.locator('#exhibitionTitle').fill('童心绘世界');
+  await page.locator('#exhibitionSubtitle').fill('学生美术作品线上展');
+  await page.locator('#schoolName').fill('测试小学');
+  await page.locator('#className').fill('三年级 1 班');
+  await page.locator('#introText').fill('这是一场由自动化测试生成的线上作品展。');
+  await page.locator('#galleryTheme').selectOption('garden');
+  await page.locator('#displayFilter').selectOption('soft');
   await page.locator('#autoBtn').click();
   await expect(page.locator('#statusBox')).toContainText(/自动找边成功|自动找边失败/, { timeout: 30000 });
 
@@ -98,6 +106,19 @@ test('imports, cleans, and exports generated artwork image', async ({ page }, te
   const galleryZip = await galleryDownload;
   const galleryPath = await galleryZip.path();
   expect(fs.statSync(galleryPath).size).toBeGreaterThan(1000);
+  const zip = await JSZip.loadAsync(fs.readFileSync(galleryPath));
+  expect(zip.file('gallery-export/index.html')).toBeTruthy();
+  expect(zip.file('gallery-export/assets/css/gallery.css')).toBeTruthy();
+  expect(zip.file('gallery-export/assets/js/gallery.js')).toBeTruthy();
+  expect(zip.file('gallery-export/data/works.json')).toBeTruthy();
+  expect(zip.file('gallery-export/assets/images/001.jpg')).toBeTruthy();
+  const indexHtml = await zip.file('gallery-export/index.html').async('string');
+  expect(indexHtml).toContain('童心绘世界');
+  expect(indexHtml).not.toContain('照片清洗器');
+  expect(indexHtml).not.toContain('自动找边');
+  const worksData = JSON.parse(await zip.file('gallery-export/data/works.json').async('string'));
+  expect(worksData.works).toHaveLength(1);
+  expect(worksData.works[0].title).toBe('自动化测试作品');
 
   await page.locator('#clearBtn').click();
   await expect(page.locator('#imageList .image-item')).toHaveCount(0);

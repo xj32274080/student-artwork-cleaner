@@ -189,13 +189,16 @@
 
   function filterCss(name) {
     const filters = {
+      original: 'none',
       natural: 'none',
       soft: 'brightness(1.06) contrast(1.04) saturate(1.04)',
       warm: 'brightness(1.05) contrast(1.04) saturate(1.12) sepia(.08)',
       fresh: 'brightness(1.07) contrast(1.06) saturate(1.08)',
+      film: 'brightness(1.03) contrast(1.07) saturate(.96) sepia(.06)',
+      contrast: 'brightness(1.03) contrast(1.16) saturate(1.12)',
       vivid: 'brightness(1.04) contrast(1.12) saturate(1.22)',
     };
-    return filters[name] || filters.natural;
+    return filters[name] || filters.original;
   }
 
   window.ImageCleaner = {

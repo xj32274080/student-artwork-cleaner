@@ -9,7 +9,7 @@
   }
 
   function displayName(item, fallbackIndex = 0) {
-    return item.artworkTitle || item.name || `作品 ${fallbackIndex + 1}`;
+    return item.title || item.artworkTitle || item.name || `作品 ${fallbackIndex + 1}`;
   }
 
   function authorLine(item) {
@@ -81,8 +81,8 @@
     }
 
     const meta = options.meta || {};
-    const title = meta.exhibitionTitle || '学生美术作品展';
-    const subtitle = [meta.schoolName, meta.className].filter(Boolean).join(' · ') || '童心 · 色彩 · 想象力';
+    const title = meta.exhibitionTitle || '童心绘世界';
+    const subtitle = [meta.schoolName, meta.className, meta.exhibitionDate].filter(Boolean).join(' · ') || meta.exhibitionSubtitle || '学生美术作品线上展';
     const pptx = new pptxgen();
     pptx.layout = 'LAYOUT_WIDE';
     pptx.author = '学生作品照片清洗器';

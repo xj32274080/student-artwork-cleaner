@@ -391,6 +391,19 @@ select {
   color: #991b1b;
 }
 
+.settings-block {
+  margin: 14px 0;
+  padding: 12px 0;
+  border-top: 1px dashed var(--line);
+  border-bottom: 1px dashed var(--line);
+}
+
+.settings-block h3 {
+  margin: 0 0 10px;
+  color: var(--ink);
+  font-size: 14px;
+}
+
 .field-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -405,7 +418,8 @@ select {
   font-size: 12px;
 }
 
-.field-grid input {
+.field-grid input,
+.field-grid textarea {
   width: 100%;
   min-height: 36px;
   border: 1px solid var(--line);
@@ -413,12 +427,24 @@ select {
   padding: 8px 10px;
   background: #fffefa;
   color: var(--ink);
+  font: inherit;
+  resize: vertical;
 }
 
-.selected-meta {
-  border-top: 1px dashed var(--line);
-  border-bottom: 1px dashed var(--line);
-  padding: 10px 0;
+.checkbox-field {
+  display: flex !important;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px !important;
+}
+
+.checkbox-field input {
+  width: 16px;
+  min-height: auto;
+}
+
+.wide-field {
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 1120px) {
