@@ -114,7 +114,11 @@ test('imports, cleans, and exports generated artwork image', async ({ page }, te
   expect(zip.file('gallery-export/assets/images/001.jpg')).toBeTruthy();
   const indexHtml = await zip.file('gallery-export/index.html').async('string');
   expect(indexHtml).toContain('童心绘世界');
+  expect(indexHtml).toContain('assets/css/gallery.css');
+  expect(indexHtml).toContain('assets/js/gallery.js');
   expect(indexHtml).not.toContain('照片清洗器');
+  expect(indexHtml).not.toContain('管理端');
+  expect(indexHtml).not.toContain('调试');
   expect(indexHtml).not.toContain('自动找边');
   const worksData = JSON.parse(await zip.file('gallery-export/data/works.json').async('string'));
   expect(worksData.works).toHaveLength(1);
