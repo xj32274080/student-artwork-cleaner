@@ -20,12 +20,12 @@
     <section class="panel import-panel">
       <h2>1. 导入照片</h2>
       <div class="panel-body">
-        <label class="drop-zone" id="dropZone" for="fileInput" role="button" tabindex="0">
+        <label class="drop-zone" id="dropZone" role="button" tabindex="0">
           <span class="drop-icon" aria-hidden="true">+</span>
           <strong>点击选择，或把照片拖进来</strong>
           <span>支持 JPG / PNG / WEBP，可一次选择多张。</span>
+          <input id="fileInput" type="file" accept="image/*" multiple />
         </label>
-        <input id="fileInput" type="file" accept="image/*" multiple />
 
         <div class="button-row">
           <button class="secondary" id="clearBtn" type="button">清空</button>

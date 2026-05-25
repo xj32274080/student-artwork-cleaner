@@ -576,10 +576,6 @@
     bindRange('saturation', 'saturationVal');
 
     fileInput.addEventListener('change', (event) => handleFiles([...event.target.files]));
-    dropZone.addEventListener('click', (event) => {
-      event.preventDefault();
-      fileInput.click();
-    });
     dropZone.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
