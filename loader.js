@@ -1,7 +1,13 @@
 (function exposeLoader() {
   const LOCAL_OPENCV = 'libs/opencv.js';
   const CDN_OPENCV = 'https://docs.opencv.org/4.x/opencv.js';
+  const LOCAL_JSZIP = 'libs/jszip.min.js';
+  const CDN_JSZIP = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
+  const LOCAL_PPTX = 'libs/pptxgen.bundle.js';
+  const CDN_PPTX = 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js';
   let openCvPromise = null;
+  let jsZipPromise = null;
+  let pptxPromise = null;
 
   function hasUsableOpenCv() {
     return Boolean(window.cv && typeof window.cv.imread === 'function' && typeof window.cv.Mat === 'function');
@@ -97,5 +103,36 @@
     return openCvPromise;
   }
 
-  window.AppLoader = { loadOpenCv };
+  async function loadWithFallback(localSrc, cdnSrc, isReady) {
+    if (isReady()) return;
+    try {
+      await loadScript(localSrc);
+    } catch (localError) {
+      await loadScript(cdnSrc);
+    }
+    if (!isReady()) throw new Error(`依赖加载失败：${cdnSrc}`);
+  }
+
+  function loadJSZip() {
+    if (!jsZipPromise) {
+      jsZipPromise = loadWithFallback(LOCAL_JSZIP, CDN_JSZIP, () => typeof window.JSZip !== 'undefined');
+    }
+    return jsZipPromise;
+  }
+
+  function loadPptxGen() {
+    if (!pptxPromise) {
+      pptxPromise = loadWithFallback(LOCAL_PPTX, CDN_PPTX, () => typeof window.pptxgen !== 'undefined');
+    }
+    return pptxPromise;
+  }
+
+  function warmupOptionalLibraries() {
+    setTimeout(() => {
+      loadJSZip().catch(() => {});
+      loadPptxGen().catch(() => {});
+    }, 600);
+  }
+
+  window.AppLoader = { loadJSZip, loadOpenCv, loadPptxGen, warmupOptionalLibraries };
 })();

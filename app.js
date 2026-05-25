@@ -508,7 +508,10 @@
       setStatus('还没有清洗后的图片。', 'warn');
       return;
     }
-    if (typeof JSZip === 'undefined') {
+    setStatus('正在加载 ZIP 打包组件……');
+    try {
+      await window.AppLoader.loadJSZip();
+    } catch (error) {
       setStatus('JSZip 还没有加载成功，请检查网络或改用 libs 本地依赖。', 'error');
       return;
     }
@@ -524,7 +527,10 @@
       setStatus('还没有可进入展览的清洗图片。请先清洗作品，并勾选“进入展览”。', 'warn');
       return;
     }
-    if (typeof JSZip === 'undefined') {
+    setStatus('正在加载 ZIP 打包组件……');
+    try {
+      await window.AppLoader.loadJSZip();
+    } catch (error) {
       setStatus('JSZip 还没有加载成功，请检查网络或改用 libs 本地依赖。', 'error');
       return;
     }
@@ -548,6 +554,8 @@
       return;
     }
     try {
+      setStatus('正在加载 PPT 生成组件……');
+      await window.AppLoader.loadPptxGen();
       setStatus('正在生成 PPT……');
       const meta = getProjectMeta();
       await window.PptExport.downloadPptx(done, {
@@ -626,5 +634,6 @@
   updatePreview();
   updateSelectedMetaFields();
   updateButtons();
+  window.AppLoader.warmupOptionalLibraries();
   await initializeOpenCv();
 })();

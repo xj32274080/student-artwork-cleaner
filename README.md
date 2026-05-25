@@ -59,11 +59,10 @@ npm test
 
 ## 外部依赖与 libs 离线方案
 
-当前 `index.html` 默认从 CDN 加载：
+页面首屏不会等待外部库加载。依赖会在需要时按需加载：
 
-- JSZip：生成 ZIP
-- PptxGenJS：生成 PPTX
-- OpenCV.js：自动找边、透视裁切
+- OpenCV.js：进入页面后后台加载，用于自动找边、透视裁切
+- JSZip / PptxGenJS：页面打开后后台预加载；如果还没加载完，点击下载 ZIP / PPT 时会继续等待
 
 OpenCV 会优先尝试 `libs/opencv.js`，本地文件不存在时再尝试 CDN。如果 CDN 不稳定，可以把这些文件下载到 `libs/`：
 
