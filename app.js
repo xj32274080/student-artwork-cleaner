@@ -8,6 +8,7 @@
   const $ = (id) => document.getElementById(id);
   const fileInput = $('fileInput');
   const dropZone = $('dropZone');
+  const chooseFilesBtn = $('chooseFilesBtn');
   const imageList = $('imageList');
   const viewCanvas = $('viewCanvas');
   const viewContext = viewCanvas.getContext('2d');
@@ -575,7 +576,13 @@
     bindRange('shadow', 'shadowVal');
     bindRange('saturation', 'saturationVal');
 
+    fileInput.addEventListener('click', (event) => event.stopPropagation());
     fileInput.addEventListener('change', (event) => handleFiles([...event.target.files]));
+    chooseFilesBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      fileInput.click();
+    });
+    dropZone.addEventListener('click', () => fileInput.click());
     dropZone.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
